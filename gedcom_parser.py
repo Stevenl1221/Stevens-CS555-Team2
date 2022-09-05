@@ -1,57 +1,22 @@
-# def gedcom_parser(file_name):
-#     file = open(file_name, 'r')
-#     valid_tags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
-#     while (True):
-#         file_line = file.readline()
-#         if (file_line==""):
-#             break
-#         print("--> " + file_line, end="")
-#         file_line_copy = file_line.split()
-#         for tag in valid_tags:
-#             if (tag in file_line_copy):
-#                 y_n = "Y"
-#                 print("<--", end="")
-#                 if (tag=="INDI" or tag=="FAM"):
-#                     print(file_line_copy[0] + "|" + tag + "|" + y_n + "|" + file_line_copy[1])
-#                 else:
-#                     count=1
-#                     for i in file_line_copy:
-#                         if (count==1):
-#                             print(i, end="")
-#                         elif (not count==2):
-#                             if (not i==file_line_copy[-1]):
-#                                 print(i + " ", end="")
-#                             else:
-#                                 print(i)
-#                                 break
-#                         else:
-#                             if (len(file_line_copy) <= 2):
-#                                 print("|" + tag+ "|" + y_n)
-#                             else: 
-#                                 print("|" + tag+ "|" + y_n + "|", end="")
-#                         count+=1
-#                 break
-#             else:
-#                 if (tag==valid_tags[-1]):
-#                     y_n = "N"
-#                     print("<--", end="")
-#                     if (len(file_line_copy) <= 2):
-#                         print(file_line_copy[0] + "|" + file_line_copy[1] + "|" + "N")
-#                     else: 
-#                         count=1
-#                         for i in file_line_copy:
-#                             if (count==1):
-#                                 print(i, end="")
-#                             elif (not count==2):
-#                                 if (not i==file_line_copy[-1]):
-#                                     print(i + " ", end="")
-#                                 else:
-#                                     print(i)
-#                             else:
-#                                 print("|" + file_line_copy[1]+ "|" + y_n + "|", end="")
-#                             count+=1
-#                     break
-#     file.close()
+class Individual:
+    def __init__(self, id, name, gender, birth, alive, death):
+        self.id = id
+        self.name = name
+        self.gender = gender
+        self.birth = birth
+        self.alive = alive
+        self.death = death
+
+class Family:
+    def __init__(self, id, married, husband, wife, children, divorced):
+        self.chil_list = []
+        self.id = id
+        self.married = married
+        self.husband = husband
+        self.wife = wife
+        self.children = children
+        self.divorced = divorced
+
 
 from prettytable import PrettyTable
 p_table = PrettyTable()
@@ -60,7 +25,7 @@ f_table = PrettyTable()
 
 def gedcom_table(file_name):
     file = open(file_name, 'r')
-    valid_tags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
+    valid_tags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE", "N/A"]
     id_list = []
     name_list = []
     gender_list = []
@@ -75,7 +40,9 @@ def gedcom_table(file_name):
     wife_list = []
     chil_list = []
     marr_list = []
+    div_list = []
     birt_or_deat = "BIRT"
+    marr_or_div = "DIV"
     starter = False
     checker = True
     while (True):
@@ -113,15 +80,17 @@ def gedcom_table(file_name):
                             else:
                                 arg="True"
                             alive_list.append(arg)
-
                         elif (tag=="MARR"):
                             birt_or_deat = "MARR"
+                        elif (tag=="DIV"):
+                            marr_or_div = "DIV"
                         elif (tag=="DATE"):
                             if (birt_or_deat=="BIRT"):
                                 birth_list.append(arg)
                             elif (birt_or_deat=="DEAT"):
                                 death_list.append(arg)
                             else:
+                                div_list.append(arg)
                                 marr_list.append(arg)
                         elif (tag=="HUSB"):
                             checker = False
@@ -132,23 +101,35 @@ def gedcom_table(file_name):
                             checker = True
                             chil_list.append(arg)
 
-                            
 
     p_table.add_column("ID", id_list)
     p_table.add_column("Name", name_list)
     p_table.add_column("Gender", gender_list)
     p_table.add_column("Birthday", birth_list)
     p_table.add_column("Alive", alive_list)
-    # p_table.add_column("Child", child_list)
-    # p_table.add_column("Spouse", spouse_list)
-    # p_table.add_column("Death", death_list)
+    p_table.add_column("Child", child_list)
+    p_table.add_column("Spouse", spouse_list)
+    p_table.add_column("Death", death_list)
     f_table.add_column("ID", fam_list)
     f_table.add_column("Married", marr_list)
+    f_table.add_column("Divorced",div_list)
     f_table.add_column("Husband ID", husb_list)
     f_table.add_column("Wife ID", wife_list)
     f_table.add_column("Children", chil_list)
-    print(p_table)
-    print(f_table)
+    # print(p_table)
+    # print(f_table)
     file.close()
-         
+    ans = []
+    fam_ans = []
+    for i in range(len(id_list)):
+        ans.append(Individual(id_list[i], name_list[i], gender_list[i], birth_list[i], alive_list[i], death_list[i]))
+    
+    for i in range(len(fam_list)):
+        fam_ans.append(Family(fam_list[i], marr_list[i], husb_list[i], wife_list[i], chil_list[i], div_list[i]))
+    
+    # for i in range(len(fam_list)):
+    #     print(fam_ans[i].married)
+
+    return [ans, fam_ans]
+    
 gedcom_table("gedcom_test.ged")
