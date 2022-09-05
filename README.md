@@ -6,5 +6,5 @@ The purpose of this project was to perform Agile Scrum methods.
 
 In this project, we:
   - Held weekly meetings, created 20+ user stories and use cases, burndown charts, backlogs, and weekly sprints
-  - Parsed gedcom files into a readable text file and table
+  - Parsed gedcom files into a readable text file and table using Python
   - Performed unit testing to satisfy user stories and verify use cases are correct
